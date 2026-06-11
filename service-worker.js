@@ -1,4 +1,4 @@
-const CACHE_NAME = "control-productos-v3";
+const CACHE_NAME = "control-productos-v6";
 const APP_FILES = [
   "./",
   "./index.html",

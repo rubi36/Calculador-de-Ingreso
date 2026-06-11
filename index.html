@@ -251,7 +251,10 @@
         <h1>Control de productos</h1>
         <p class="subtitle">Calcula cantidad × precio y lleva el total de cada semana.</p>
       </div>
-      <button class="secondary" id="exportBtn" style="width:auto">Exportar CSV</button>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="secondary" id="printWeekBtn" style="width:auto">Imprimir semana</button>
+        <button class="secondary" id="exportBtn" style="width:auto">Exportar CSV</button>
+      </div>
     </header>
 
     <section class="card">
@@ -671,6 +674,223 @@
         save();
         render();
       }
+    });
+
+
+    document.getElementById("printWeekBtn").addEventListener("click", () => {
+      const chosenWeek = weekFilter.value;
+
+      if (chosenWeek === "all") {
+        alert("Selecciona una semana específica antes de imprimir.");
+        weekFilter.focus();
+        return;
+      }
+
+      const weekRecords = records
+        .filter(record => weekStart(record.date) === chosenWeek)
+        .sort((a, b) => a.date.localeCompare(b.date) || a.product.localeCompare(b.product));
+
+      if (!weekRecords.length) {
+        alert("No hay productos registrados en la semana seleccionada.");
+        return;
+      }
+
+      const start = localDate(chosenWeek);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+
+      const formatFullDate = date => date.toLocaleDateString("es-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+
+      const weeklyBalance = weekRecords.reduce(
+        (sum, record) => sum + record.quantity * record.price,
+        0
+      );
+
+      const rows = weekRecords.map(record => `
+        <tr>
+          <td>${localDate(record.date).toLocaleDateString("es-US")}</td>
+          <td>${escapeHtml(record.product)}</td>
+          <td>${Number(record.quantity.toFixed(2))}</td>
+          <td>${money(record.price)}</td>
+          <td>${money(record.quantity * record.price)}</td>
+        </tr>
+      `).join("");
+
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        alert("El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes e inténtalo nuevamente.");
+        return;
+      }
+
+      printWindow.document.open();
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Recibo semanal</title>
+          <style>
+            @page {
+              size: 80mm auto;
+              margin: 5mm;
+            }
+
+            * {
+              box-sizing: border-box;
+            }
+
+            body {
+              width: 70mm;
+              margin: 0 auto;
+              padding: 0;
+              font-family: Arial, Helvetica, sans-serif;
+              color: #222;
+              background: #fff;
+              font-size: 12px;
+            }
+
+            .receipt {
+              width: 100%;
+            }
+
+            h1 {
+              margin: 0 0 6px;
+              text-align: center;
+              font-size: 17px;
+              line-height: 1.15;
+            }
+
+            .period {
+              text-align: center;
+              font-weight: 700;
+              font-size: 13px;
+              margin-bottom: 14px;
+            }
+
+            .divider {
+              border-top: 1px dashed #555;
+              margin: 8px 0;
+            }
+
+            .header-row,
+            .item-row {
+              display: grid;
+              grid-template-columns: minmax(0, 1fr) 34px 62px;
+              gap: 5px;
+              align-items: start;
+            }
+
+            .header-row {
+              font-weight: 700;
+              padding-bottom: 5px;
+            }
+
+            .item-row {
+              padding: 5px 0;
+              line-height: 1.2;
+            }
+
+            .product-name {
+              overflow-wrap: anywhere;
+            }
+
+            .qty,
+            .amount {
+              text-align: right;
+              white-space: nowrap;
+            }
+
+            .item-date {
+              grid-column: 1 / -1;
+              font-size: 10px;
+              color: #666;
+              margin-bottom: 1px;
+            }
+
+            .price-line {
+              grid-column: 1 / -1;
+              font-size: 10px;
+              color: #555;
+              text-align: right;
+              margin-top: 1px;
+            }
+
+            .total-box {
+              margin-top: 10px;
+              padding-top: 8px;
+              border-top: 2px solid #222;
+              display: flex;
+              justify-content: space-between;
+              gap: 10px;
+              font-size: 16px;
+              font-weight: 800;
+            }
+
+            .printed-at {
+              text-align: center;
+              margin-top: 14px;
+              font-size: 9px;
+              color: #777;
+            }
+
+            @media print {
+              body {
+                width: 70mm;
+                margin: 0 auto;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="receipt">
+            <h1>Palm Springs Bakery</h1>
+            <div class="period">
+              Semana del ${start.toLocaleDateString("es-US")} al ${end.toLocaleDateString("es-US")}
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="header-row">
+              <div>Producto</div>
+              <div class="qty">Cant.</div>
+              <div class="amount">Total</div>
+            </div>
+
+            <div class="divider"></div>
+
+            ${weekRecords.map(record => `
+              <div class="item-row">
+                <div class="item-date">${localDate(record.date).toLocaleDateString("es-US")}</div>
+                <div class="product-name">${escapeHtml(record.product)}</div>
+                <div class="qty">${Number(record.quantity.toFixed(2))}</div>
+                <div class="amount">${money(record.quantity * record.price)}</div>
+                <div class="price-line">Precio unitario: ${money(record.price)}</div>
+              </div>
+            `).join("")}
+
+            <div class="total-box">
+              <span>Saldo total</span>
+              <span>${money(weeklyBalance)}</span>
+            </div>
+
+            <div class="printed-at">
+              Impreso el ${new Date().toLocaleString("es-US")}
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
     });
 
     document.getElementById("exportBtn").addEventListener("click", () => {
