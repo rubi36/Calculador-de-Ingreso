@@ -292,8 +292,12 @@
         <strong id="monthTotal">$0.00</strong>
       </div>
       <div class="metric">
-        <span>Unidades de la semana</span>
-        <strong id="weekUnits">0</strong>
+        <span>Total de masas</span>
+        <strong id="totalMasas">0</strong>
+      </div>
+      <div class="metric">
+        <span>Total de pasteles</span>
+        <strong id="totalPasteles">0</strong>
       </div>
       <div class="metric">
         <span>Total acumulado</span>
@@ -303,7 +307,7 @@
 
     <section class="card">
       <div class="tabs" role="tablist" aria-label="Tipo de registros">
-        <button type="button" class="tab-button active" id="allTab">Todos los productos</button>
+        <button type="button" class="tab-button active" id="allTab">Pasteles</button>
         <button type="button" class="tab-button" id="masasTab">Masas ($7)</button>
       </div>
 
@@ -319,7 +323,7 @@
       </div>
 
       <div class="toolbar">
-        <h2 style="margin:0" id="recordsTitle">Todos los registros</h2>
+        <h2 style="margin:0" id="recordsTitle">Registros de pasteles</h2>
         <div class="filters">
           <select id="weekFilter" aria-label="Filtrar por semana"></select>
           <select id="monthFilter" aria-label="Filtrar por mes"></select>
@@ -506,7 +510,7 @@
 
       const visible = records
         .filter(r => chosenWeek === "all" || weekStart(r.date) === chosenWeek)
-        .filter(r => activeTab === "all" || isMasas(r.product))
+        .filter(r => activeTab === "masas" ? isMasas(r.product) : !isMasas(r.product))
         .filter(r => r.product.toLowerCase().includes(term))
         .sort((a, b) => b.date.localeCompare(a.date));
 
@@ -533,12 +537,12 @@
       emptyState.style.display = visible.length ? "none" : "block";
       emptyState.textContent = activeTab === "masas"
         ? "Todavía no hay registros de masas."
-        : "Todavía no hay productos registrados.";
+        : "Todavía no hay registros de pasteles.";
 
       allTab.classList.toggle("active", activeTab === "all");
       masasTab.classList.toggle("active", activeTab === "masas");
       masasSummary.classList.toggle("visible", activeTab === "masas");
-      recordsTitle.textContent = activeTab === "masas" ? "Registros de masas" : "Todos los registros";
+      recordsTitle.textContent = activeTab === "masas" ? "Registros de masas" : "Registros de pasteles";
 
       const weekRecords = chosenWeek === "all"
         ? records
@@ -550,20 +554,22 @@
 
       const weekTotal = weekRecords.reduce((sum, r) => sum + r.quantity * r.price, 0);
       const monthTotal = monthRecords.reduce((sum, r) => sum + r.quantity * r.price, 0);
-      const weekUnits = weekRecords.reduce((sum, r) => sum + r.quantity, 0);
       const allTotal = records.reduce((sum, r) => sum + r.quantity * r.price, 0);
 
-      const filteredMasas = records.filter(r =>
-        isMasas(r.product) &&
+      const filteredRecords = records.filter(r =>
         (chosenWeek === "all" || weekStart(r.date) === chosenWeek) &&
         (chosenMonth === "all" || monthKey(r.date) === chosenMonth)
       );
+      const filteredMasas = filteredRecords.filter(r => isMasas(r.product));
+      const filteredPasteles = filteredRecords.filter(r => !isMasas(r.product));
       const masasQuantity = filteredMasas.reduce((sum, r) => sum + r.quantity, 0);
+      const pastelesQuantity = filteredPasteles.reduce((sum, r) => sum + r.quantity, 0);
       const masasBalance = filteredMasas.reduce((sum, r) => sum + r.quantity * 7, 0);
 
       document.getElementById("weekTotal").textContent = money(weekTotal);
       document.getElementById("monthTotal").textContent = money(monthTotal);
-      document.getElementById("weekUnits").textContent = Number(weekUnits.toFixed(2));
+      document.getElementById("totalMasas").textContent = Number(masasQuantity.toFixed(2));
+      document.getElementById("totalPasteles").textContent = Number(pastelesQuantity.toFixed(2));
       document.getElementById("allTotal").textContent = money(allTotal);
       document.getElementById("masasQuantity").textContent = Number(masasQuantity.toFixed(2));
       document.getElementById("masasBalance").textContent = money(masasBalance);
