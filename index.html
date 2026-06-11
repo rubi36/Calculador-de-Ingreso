@@ -163,6 +163,40 @@
       font-size: .82rem;
     }
 
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tab-button {
+      width: auto;
+      background: #eee7e3;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .tab-button.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .masas-summary {
+      display: none;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .masas-summary.visible { display: grid; }
+
+    .fixed-price {
+      background: #fff8dc;
+      font-weight: 800;
+    }
+
     .toolbar {
       display: flex;
       gap: 10px;
@@ -199,6 +233,7 @@
       .grid { grid-template-columns: 1fr 1fr; }
       .button-cell { grid-column: 1 / -1; }
       .summary { grid-template-columns: 1fr; }
+      .masas-summary { grid-template-columns: 1fr; }
       header { align-items: start; flex-direction: column; }
     }
 
@@ -244,7 +279,7 @@
           </div>
         </div>
       </form>
-      <div class="note">Ejemplo: 6 pasteles × $2.00 = $12.00.</div>
+      <div class="note">Ejemplo: 6 pasteles × $2.00 = $12.00. Si escribes “Masas”, el precio se coloca automáticamente en $7.00 por unidad.</div>
     </section>
 
     <section class="summary">
@@ -267,8 +302,24 @@
     </section>
 
     <section class="card">
+      <div class="tabs" role="tablist" aria-label="Tipo de registros">
+        <button type="button" class="tab-button active" id="allTab">Todos los productos</button>
+        <button type="button" class="tab-button" id="masasTab">Masas ($7)</button>
+      </div>
+
+      <div class="masas-summary" id="masasSummary">
+        <div class="metric">
+          <span>Cantidad de masas</span>
+          <strong id="masasQuantity">0</strong>
+        </div>
+        <div class="metric">
+          <span>Saldo de masas</span>
+          <strong id="masasBalance">$0.00</strong>
+        </div>
+      </div>
+
       <div class="toolbar">
-        <h2 style="margin:0">Registros</h2>
+        <h2 style="margin:0" id="recordsTitle">Todos los registros</h2>
         <div class="filters">
           <select id="weekFilter" aria-label="Filtrar por semana"></select>
           <select id="monthFilter" aria-label="Filtrar por mes"></select>
@@ -300,6 +351,7 @@
     const STORAGE_KEY = "control_productos_registros_v1";
     let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     let editingId = null;
+    let activeTab = "all";
 
     const form = document.getElementById("productForm");
     const dateInput = document.getElementById("date");
@@ -313,6 +365,10 @@
     const emptyState = document.getElementById("emptyState");
     const submitBtn = document.getElementById("submitBtn");
     const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const allTab = document.getElementById("allTab");
+    const masasTab = document.getElementById("masasTab");
+    const masasSummary = document.getElementById("masasSummary");
+    const recordsTitle = document.getElementById("recordsTitle");
 
     dateInput.valueAsDate = new Date();
 
@@ -356,6 +412,31 @@
         month: "long",
         year: "numeric"
       });
+    }
+
+    function normalizeText(value) {
+      return value
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+    }
+
+    function isMasas(productName) {
+      return /(^|\s)masas?(\s|$)/.test(normalizeText(productName));
+    }
+
+    function applyMasasPrice() {
+      if (isMasas(productInput.value)) {
+        priceInput.value = "7.00";
+        priceInput.readOnly = true;
+        priceInput.classList.add("fixed-price");
+        priceInput.title = "El precio de Masas es fijo: $7.00";
+      } else {
+        priceInput.readOnly = false;
+        priceInput.classList.remove("fixed-price");
+        priceInput.title = "";
+      }
     }
 
     function save() {
@@ -425,6 +506,7 @@
 
       const visible = records
         .filter(r => chosenWeek === "all" || weekStart(r.date) === chosenWeek)
+        .filter(r => activeTab === "all" || isMasas(r.product))
         .filter(r => r.product.toLowerCase().includes(term))
         .sort((a, b) => b.date.localeCompare(a.date));
 
@@ -449,6 +531,14 @@
       });
 
       emptyState.style.display = visible.length ? "none" : "block";
+      emptyState.textContent = activeTab === "masas"
+        ? "Todavía no hay registros de masas."
+        : "Todavía no hay productos registrados.";
+
+      allTab.classList.toggle("active", activeTab === "all");
+      masasTab.classList.toggle("active", activeTab === "masas");
+      masasSummary.classList.toggle("visible", activeTab === "masas");
+      recordsTitle.textContent = activeTab === "masas" ? "Registros de masas" : "Todos los registros";
 
       const weekRecords = chosenWeek === "all"
         ? records
@@ -463,10 +553,20 @@
       const weekUnits = weekRecords.reduce((sum, r) => sum + r.quantity, 0);
       const allTotal = records.reduce((sum, r) => sum + r.quantity * r.price, 0);
 
+      const filteredMasas = records.filter(r =>
+        isMasas(r.product) &&
+        (chosenWeek === "all" || weekStart(r.date) === chosenWeek) &&
+        (chosenMonth === "all" || monthKey(r.date) === chosenMonth)
+      );
+      const masasQuantity = filteredMasas.reduce((sum, r) => sum + r.quantity, 0);
+      const masasBalance = filteredMasas.reduce((sum, r) => sum + r.quantity * 7, 0);
+
       document.getElementById("weekTotal").textContent = money(weekTotal);
       document.getElementById("monthTotal").textContent = money(monthTotal);
       document.getElementById("weekUnits").textContent = Number(weekUnits.toFixed(2));
       document.getElementById("allTotal").textContent = money(allTotal);
+      document.getElementById("masasQuantity").textContent = Number(masasQuantity.toFixed(2));
+      document.getElementById("masasBalance").textContent = money(masasBalance);
     }
 
     function escapeHtml(text) {
@@ -479,7 +579,7 @@
       event.preventDefault();
 
       const quantity = Number(quantityInput.value);
-      const price = Number(priceInput.value);
+      const price = isMasas(productInput.value) ? 7 : Number(priceInput.value);
 
       if (!dateInput.value || !productInput.value.trim() || quantity <= 0 || price < 0) {
         alert("Revisa los datos antes de guardar.");
@@ -511,6 +611,8 @@
       productInput.value = "";
       quantityInput.value = "";
       priceInput.value = "";
+      priceInput.readOnly = false;
+      priceInput.classList.remove("fixed-price");
       submitBtn.textContent = "Agregar registro";
       cancelEditBtn.style.display = "none";
       productInput.focus();
@@ -524,7 +626,8 @@
       dateInput.value = record.date;
       productInput.value = record.product;
       quantityInput.value = record.quantity;
-      priceInput.value = record.price;
+      priceInput.value = isMasas(record.product) ? "7.00" : record.price;
+      applyMasasPrice();
       submitBtn.textContent = "Guardar cambios";
       cancelEditBtn.style.display = "block";
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -539,6 +642,18 @@
       save();
       render();
     };
+
+    productInput.addEventListener("input", applyMasasPrice);
+
+    allTab.addEventListener("click", () => {
+      activeTab = "all";
+      render();
+    });
+
+    masasTab.addEventListener("click", () => {
+      activeTab = "masas";
+      render();
+    });
 
     weekFilter.addEventListener("change", render);
     monthFilter.addEventListener("change", render);

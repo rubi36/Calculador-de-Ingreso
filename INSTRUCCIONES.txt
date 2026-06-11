@@ -23,3 +23,9 @@ Los registros se guardan en el navegador del dispositivo. Usa “Exportar CSV”
 
 
 Esta versión usa como icono el logo de Palm Springs Bakery proporcionado por el usuario.
+
+
+ACTUALIZACIÓN MASAS:
+- Al escribir Masas, el precio se fija automáticamente en $7.00 por unidad.
+- La pestaña Masas muestra solamente esos registros y su cantidad/saldo.
+- Los importes de Masas también se incluyen en los totales semanal, mensual y acumulado.
