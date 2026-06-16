@@ -110,7 +110,7 @@
 
     .summary {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 14px;
     }
 
@@ -231,7 +231,8 @@
       border-radius: 12px;
       box-shadow: var(--shadow);
       padding: 20px 16px;
-      font-family: "Courier New", Courier, monospace;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
     }
 
     .print-controls {
@@ -251,7 +252,7 @@
     }
     .print-summary p {
       margin: 7px 0;
-      font-size: 1rem;
+      font-size: 10pt;
       display: flex;
       justify-content: space-between;
       gap: 12px;
@@ -259,18 +260,18 @@
     .print-title {
       text-align: center;
       margin-bottom: 6px;
-      font-size: 1.35rem;
+      font-size: 12pt;
     }
     .print-period {
       text-align: center;
       color: #333;
       margin-bottom: 14px;
-      font-size: .85rem;
+      font-size: 10pt;
     }
     .print-sheet table {
       min-width: 0;
       table-layout: fixed;
-      font-size: .78rem;
+      font-size: 10pt;
     }
     .print-sheet th,
     .print-sheet td {
@@ -308,6 +309,8 @@
         max-width: 70mm !important;
         margin: 0 auto !important;
         padding: 0 !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 10pt !important;
         border-radius: 0 !important;
         box-shadow: none !important;
       }
@@ -390,8 +393,12 @@
         <strong id="monthTotal">$0.00</strong>
       </div>
       <div class="metric">
-        <span>Unidades de la semana</span>
-        <strong id="weekUnits">0</strong>
+        <span>Pasteles</span>
+        <strong id="weekPastries">0</strong>
+      </div>
+      <div class="metric">
+        <span>Masas</span>
+        <strong id="weekMasas">0</strong>
       </div>
       <div class="metric">
         <span>Total acumulado</span>
@@ -651,12 +658,20 @@
 
       const weekTotal = weekRecords.reduce((sum, r) => sum + r.quantity * r.price, 0);
       const monthTotal = monthRecords.reduce((sum, r) => sum + r.quantity * r.price, 0);
-      const weekUnits = weekRecords.reduce((sum, r) => sum + r.quantity, 0);
+      const weekPastries = weekRecords
+        .filter(r => r.product.trim().toLowerCase() !== "masas")
+        .reduce((sum, r) => sum + r.quantity, 0);
+
+      const weekMasas = weekRecords
+        .filter(r => r.product.trim().toLowerCase() === "masas")
+        .reduce((sum, r) => sum + r.quantity, 0);
+
       const allTotal = records.reduce((sum, r) => sum + r.quantity * r.price, 0);
 
       document.getElementById("weekTotal").textContent = money(weekTotal);
       document.getElementById("monthTotal").textContent = money(monthTotal);
-      document.getElementById("weekUnits").textContent = Number(weekUnits.toFixed(2));
+      document.getElementById("weekPastries").textContent = Number(weekPastries.toFixed(2));
+      document.getElementById("weekMasas").textContent = Number(weekMasas.toFixed(2));
       document.getElementById("allTotal").textContent = money(allTotal);
     }
 

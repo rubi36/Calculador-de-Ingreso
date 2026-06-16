@@ -33,3 +33,6 @@ ACTUALIZACIÓN V2:
 
 
 VERSIÓN V3: La impresión está diseñada como recibo estrecho y termina con Pasteles, Masas y Total $ en negrita.
+
+
+VERSIÓN V4: En la pantalla principal, 'Unidades de la semana' fue reemplazado por 'Pasteles' y 'Masas'. Pasteles suma todo excepto Masas; Masas suma solo los registros llamados Masas. La impresión usa Arial 10.
