@@ -225,16 +225,17 @@
     .print-preview.active { display: block; }
 
     .print-sheet {
-      width: min(900px, 100%);
+      width: min(380px, 100%);
       margin: 0 auto;
       background: white;
-      border-radius: 16px;
+      border-radius: 12px;
       box-shadow: var(--shadow);
-      padding: 28px;
+      padding: 20px 16px;
+      font-family: "Courier New", Courier, monospace;
     }
 
     .print-controls {
-      width: min(900px, 100%);
+      width: min(380px, 100%);
       margin: 0 auto 14px;
       display: flex;
       gap: 10px;
@@ -243,10 +244,54 @@
     }
 
     .print-controls button { width: auto; }
-    .print-summary { margin-top: 24px; border-top: 2px solid #222; padding-top: 14px; }
-    .print-summary p { margin: 8px 0; font-size: 1.05rem; }
-    .print-title { text-align: center; margin-bottom: 8px; }
-    .print-period { text-align: center; color: #555; margin-bottom: 22px; }
+    .print-summary {
+      margin-top: 16px;
+      border-top: 2px dashed #222;
+      padding-top: 12px;
+    }
+    .print-summary p {
+      margin: 7px 0;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .print-title {
+      text-align: center;
+      margin-bottom: 6px;
+      font-size: 1.35rem;
+    }
+    .print-period {
+      text-align: center;
+      color: #333;
+      margin-bottom: 14px;
+      font-size: .85rem;
+    }
+    .print-sheet table {
+      min-width: 0;
+      table-layout: fixed;
+      font-size: .78rem;
+    }
+    .print-sheet th,
+    .print-sheet td {
+      padding: 7px 3px;
+      word-break: break-word;
+    }
+    .print-sheet th:nth-child(1),
+    .print-sheet td:nth-child(1) { width: 19%; }
+    .print-sheet th:nth-child(2),
+    .print-sheet td:nth-child(2) { width: 37%; }
+    .print-sheet th:nth-child(3),
+    .print-sheet td:nth-child(3) { width: 14%; text-align: center; }
+    .print-sheet th:nth-child(4),
+    .print-sheet td:nth-child(4) { width: 15%; text-align: right; }
+    .print-sheet th:nth-child(5),
+    .print-sheet td:nth-child(5) { width: 15%; text-align: right; }
+
+    @page {
+      size: 80mm auto;
+      margin: 5mm;
+    }
 
     @media print {
       body { background: white !important; }
@@ -259,8 +304,9 @@
       }
       .print-controls { display: none !important; }
       .print-sheet {
-        width: 100% !important;
-        margin: 0 !important;
+        width: 70mm !important;
+        max-width: 70mm !important;
+        margin: 0 auto !important;
         padding: 0 !important;
         border-radius: 0 !important;
         box-shadow: none !important;
@@ -407,9 +453,9 @@
         </table>
       </div>
       <div class="print-summary">
-        <p><strong>Total de pasteles de la semana: <span id="printPastriesTotal">0</span></strong></p>
-        <p><strong>Total de masas de la semana: <span id="printMasasTotal">0</span></strong></p>
-        <p><strong>Saldo total de la semana: <span id="printWeekBalance">$0.00</span></strong></p>
+        <p><strong>Pasteles</strong><strong id="printPastriesTotal">0</strong></p>
+        <p><strong>Masas</strong><strong id="printMasasTotal">0</strong></p>
+        <p><strong>Total $</strong><strong id="printWeekBalance">$0.00</strong></p>
       </div>
     </div>
   </section>

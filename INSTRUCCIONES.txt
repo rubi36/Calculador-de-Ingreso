@@ -30,3 +30,6 @@ ACTUALIZACIÓN V2:
 - Vista previa de impresión con botón para regresar al inicio.
 - Impresión o guardado en PDF mediante el cuadro del dispositivo.
 - Totales semanales de pasteles, masas y saldo en negrita.
+
+
+VERSIÓN V3: La impresión está diseñada como recibo estrecho y termina con Pasteles, Masas y Total $ en negrita.

@@ -1,4 +1,4 @@
-const CACHE_NAME = "control-productos-v2";
+const CACHE_NAME = "palm-springs-bakery-v3";
 const APP_FILES = [
   "./",
   "./index.html",
