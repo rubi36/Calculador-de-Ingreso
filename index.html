@@ -163,40 +163,6 @@
       font-size: .82rem;
     }
 
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .tab-button {
-      width: auto;
-      background: #eee7e3;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .tab-button.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-
-    .masas-summary {
-      display: none;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .masas-summary.visible { display: grid; }
-
-    .fixed-price {
-      background: #fff8dc;
-      font-weight: 800;
-    }
-
     .toolbar {
       display: flex;
       gap: 10px;
@@ -233,7 +199,6 @@
       .grid { grid-template-columns: 1fr 1fr; }
       .button-cell { grid-column: 1 / -1; }
       .summary { grid-template-columns: 1fr; }
-      .masas-summary { grid-template-columns: 1fr; }
       header { align-items: start; flex-direction: column; }
     }
 
@@ -242,6 +207,68 @@
       .container { width: min(100% - 18px, 1100px); margin-top: 12px; }
       .card { padding: 15px; border-radius: 14px; }
     }
+
+
+    .other-product-wrap { display: none; margin-top: 9px; }
+    .other-product-wrap.visible { display: block; }
+
+    .print-preview {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      overflow-y: auto;
+      background: var(--bg);
+      padding: 20px;
+    }
+
+    .print-preview.active { display: block; }
+
+    .print-sheet {
+      width: min(900px, 100%);
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .print-controls {
+      width: min(900px, 100%);
+      margin: 0 auto 14px;
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .print-controls button { width: auto; }
+    .print-summary { margin-top: 24px; border-top: 2px solid #222; padding-top: 14px; }
+    .print-summary p { margin: 8px 0; font-size: 1.05rem; }
+    .print-title { text-align: center; margin-bottom: 8px; }
+    .print-period { text-align: center; color: #555; margin-bottom: 22px; }
+
+    @media print {
+      body { background: white !important; }
+      body > main { display: none !important; }
+      .print-preview {
+        display: block !important;
+        position: static !important;
+        padding: 0 !important;
+        background: white !important;
+      }
+      .print-controls { display: none !important; }
+      .print-sheet {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      .print-sheet table { min-width: 0 !important; }
+      .print-sheet th, .print-sheet td { color: #000 !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -252,7 +279,7 @@
         <p class="subtitle">Calcula cantidad × precio y lleva el total de cada semana.</p>
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="secondary" id="printWeekBtn" style="width:auto">Imprimir semana</button>
+        <button class="secondary" id="printBtn" style="width:auto">Imprimir semana</button>
         <button class="secondary" id="exportBtn" style="width:auto">Exportar CSV</button>
       </div>
     </header>
@@ -265,7 +292,29 @@
         </div>
         <div>
           <label for="product">Producto</label>
-          <input type="text" id="product" placeholder="Ej. Pastel" required />
+          <select id="product" required>
+            <option value="">Seleccione un producto</option>
+            <option value="Guayaba">Guayaba</option>
+            <option value="Guayaba y Queso Party">Guayaba y Queso Party</option>
+            <option value="Guayaba y Queso Regular">Guayaba y Queso Regular</option>
+            <option value="Quesitos Party">Quesitos Party</option>
+            <option value="Quesos Regular">Quesos Regular</option>
+            <option value="Carnitas Party">Carnitas Party</option>
+            <option value="Carne Regular">Carne Regular</option>
+            <option value="Pizza">Pizza</option>
+            <option value="Señoritas">Señoritas</option>
+            <option value="Butifarritas">Butifarritas</option>
+            <option value="Empanaditas">Empanaditas</option>
+            <option value="Chiviricos">Chiviricos</option>
+            <option value="Palmeritas">Palmeritas</option>
+            <option value="Masas">Masas</option>
+            <option value="Coco">Coco</option>
+            <option value="Otros">Otros</option>
+          </select>
+          <div class="other-product-wrap" id="otherProductWrap">
+            <label for="otherProduct">Escriba el otro producto</label>
+            <input type="text" id="otherProduct" placeholder="Nombre del producto" />
+          </div>
         </div>
         <div>
           <label for="quantity">Cantidad</label>
@@ -282,7 +331,7 @@
           </div>
         </div>
       </form>
-      <div class="note">Ejemplo: 6 pasteles × $2.00 = $12.00. Si escribes “Masas”, el precio se coloca automáticamente en $7.00 por unidad.</div>
+      <div class="note">Ejemplo: 6 pasteles × $2.00 = $12.00.</div>
     </section>
 
     <section class="summary">
@@ -295,12 +344,8 @@
         <strong id="monthTotal">$0.00</strong>
       </div>
       <div class="metric">
-        <span>Total de masas</span>
-        <strong id="totalMasas">0</strong>
-      </div>
-      <div class="metric">
-        <span>Total de pasteles</span>
-        <strong id="totalPasteles">0</strong>
+        <span>Unidades de la semana</span>
+        <strong id="weekUnits">0</strong>
       </div>
       <div class="metric">
         <span>Total acumulado</span>
@@ -309,24 +354,8 @@
     </section>
 
     <section class="card">
-      <div class="tabs" role="tablist" aria-label="Tipo de registros">
-        <button type="button" class="tab-button active" id="allTab">Pasteles</button>
-        <button type="button" class="tab-button" id="masasTab">Masas ($7)</button>
-      </div>
-
-      <div class="masas-summary" id="masasSummary">
-        <div class="metric">
-          <span>Cantidad de masas</span>
-          <strong id="masasQuantity">0</strong>
-        </div>
-        <div class="metric">
-          <span>Saldo de masas</span>
-          <strong id="masasBalance">$0.00</strong>
-        </div>
-      </div>
-
       <div class="toolbar">
-        <h2 style="margin:0" id="recordsTitle">Registros de pasteles</h2>
+        <h2 style="margin:0">Registros</h2>
         <div class="filters">
           <select id="weekFilter" aria-label="Filtrar por semana"></select>
           <select id="monthFilter" aria-label="Filtrar por mes"></select>
@@ -354,15 +383,47 @@
     </section>
   </main>
 
+
+  <section class="print-preview" id="printPreview" aria-hidden="true">
+    <div class="print-controls">
+      <button type="button" class="secondary" id="backToHomeBtn">← Regresar al inicio</button>
+      <button type="button" class="primary" id="systemPrintBtn">Imprimir o guardar en PDF</button>
+    </div>
+    <div class="print-sheet">
+      <h1 class="print-title">Palm Springs Bakery</h1>
+      <div class="print-period" id="printPeriod"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody id="printRecordsBody"></tbody>
+        </table>
+      </div>
+      <div class="print-summary">
+        <p><strong>Total de pasteles de la semana: <span id="printPastriesTotal">0</span></strong></p>
+        <p><strong>Total de masas de la semana: <span id="printMasasTotal">0</span></strong></p>
+        <p><strong>Saldo total de la semana: <span id="printWeekBalance">$0.00</span></strong></p>
+      </div>
+    </div>
+  </section>
+
   <script>
     const STORAGE_KEY = "control_productos_registros_v1";
     let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     let editingId = null;
-    let activeTab = "all";
 
     const form = document.getElementById("productForm");
     const dateInput = document.getElementById("date");
     const productInput = document.getElementById("product");
+    const otherProductInput = document.getElementById("otherProduct");
+    const otherProductWrap = document.getElementById("otherProductWrap");
     const quantityInput = document.getElementById("quantity");
     const priceInput = document.getElementById("price");
     const body = document.getElementById("recordsBody");
@@ -372,10 +433,8 @@
     const emptyState = document.getElementById("emptyState");
     const submitBtn = document.getElementById("submitBtn");
     const cancelEditBtn = document.getElementById("cancelEditBtn");
-    const allTab = document.getElementById("allTab");
-    const masasTab = document.getElementById("masasTab");
-    const masasSummary = document.getElementById("masasSummary");
-    const recordsTitle = document.getElementById("recordsTitle");
+    const printPreview = document.getElementById("printPreview");
+    const printRecordsBody = document.getElementById("printRecordsBody");
 
     dateInput.valueAsDate = new Date();
 
@@ -421,29 +480,27 @@
       });
     }
 
-    function normalizeText(value) {
-      return value
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim()
-        .toLowerCase();
+    const PRODUCT_OPTIONS = [
+      "Guayaba", "Guayaba y Queso Party", "Guayaba y Queso Regular",
+      "Quesitos Party", "Quesos Regular", "Carnitas Party", "Carne Regular",
+      "Pizza", "Señoritas", "Butifarritas", "Empanaditas", "Chiviricos",
+      "Palmeritas", "Masas", "Coco"
+    ];
+
+    function selectedProductName() {
+      if (productInput.value === "Otros") return otherProductInput.value.trim();
+      return productInput.value.trim();
+    }
+
+    function toggleOtherProduct() {
+      const isOther = productInput.value === "Otros";
+      otherProductWrap.classList.toggle("visible", isOther);
+      otherProductInput.required = isOther;
+      if (!isOther) otherProductInput.value = "";
     }
 
     function isMasas(productName) {
-      return /(^|\s)masas?(\s|$)/.test(normalizeText(productName));
-    }
-
-    function applyMasasPrice() {
-      if (isMasas(productInput.value)) {
-        priceInput.value = "7.00";
-        priceInput.readOnly = true;
-        priceInput.classList.add("fixed-price");
-        priceInput.title = "El precio de Masas es fijo: $7.00";
-      } else {
-        priceInput.readOnly = false;
-        priceInput.classList.remove("fixed-price");
-        priceInput.title = "";
-      }
+      return productName.trim().toLocaleLowerCase("es") === "masas";
     }
 
     function save() {
@@ -513,7 +570,6 @@
 
       const visible = records
         .filter(r => chosenWeek === "all" || weekStart(r.date) === chosenWeek)
-        .filter(r => activeTab === "masas" ? isMasas(r.product) : !isMasas(r.product))
         .filter(r => r.product.toLowerCase().includes(term))
         .sort((a, b) => b.date.localeCompare(a.date));
 
@@ -538,14 +594,6 @@
       });
 
       emptyState.style.display = visible.length ? "none" : "block";
-      emptyState.textContent = activeTab === "masas"
-        ? "Todavía no hay registros de masas."
-        : "Todavía no hay registros de pasteles.";
-
-      allTab.classList.toggle("active", activeTab === "all");
-      masasTab.classList.toggle("active", activeTab === "masas");
-      masasSummary.classList.toggle("visible", activeTab === "masas");
-      recordsTitle.textContent = activeTab === "masas" ? "Registros de masas" : "Registros de pasteles";
 
       const weekRecords = chosenWeek === "all"
         ? records
@@ -557,25 +605,13 @@
 
       const weekTotal = weekRecords.reduce((sum, r) => sum + r.quantity * r.price, 0);
       const monthTotal = monthRecords.reduce((sum, r) => sum + r.quantity * r.price, 0);
+      const weekUnits = weekRecords.reduce((sum, r) => sum + r.quantity, 0);
       const allTotal = records.reduce((sum, r) => sum + r.quantity * r.price, 0);
-
-      const filteredRecords = records.filter(r =>
-        (chosenWeek === "all" || weekStart(r.date) === chosenWeek) &&
-        (chosenMonth === "all" || monthKey(r.date) === chosenMonth)
-      );
-      const filteredMasas = filteredRecords.filter(r => isMasas(r.product));
-      const filteredPasteles = filteredRecords.filter(r => !isMasas(r.product));
-      const masasQuantity = filteredMasas.reduce((sum, r) => sum + r.quantity, 0);
-      const pastelesQuantity = filteredPasteles.reduce((sum, r) => sum + r.quantity, 0);
-      const masasBalance = filteredMasas.reduce((sum, r) => sum + r.quantity * 7, 0);
 
       document.getElementById("weekTotal").textContent = money(weekTotal);
       document.getElementById("monthTotal").textContent = money(monthTotal);
-      document.getElementById("totalMasas").textContent = Number(masasQuantity.toFixed(2));
-      document.getElementById("totalPasteles").textContent = Number(pastelesQuantity.toFixed(2));
+      document.getElementById("weekUnits").textContent = Number(weekUnits.toFixed(2));
       document.getElementById("allTotal").textContent = money(allTotal);
-      document.getElementById("masasQuantity").textContent = Number(masasQuantity.toFixed(2));
-      document.getElementById("masasBalance").textContent = money(masasBalance);
     }
 
     function escapeHtml(text) {
@@ -588,9 +624,11 @@
       event.preventDefault();
 
       const quantity = Number(quantityInput.value);
-      const price = isMasas(productInput.value) ? 7 : Number(priceInput.value);
+      const price = Number(priceInput.value);
 
-      if (!dateInput.value || !productInput.value.trim() || quantity <= 0 || price < 0) {
+      const productName = selectedProductName();
+
+      if (!dateInput.value || !productName || quantity <= 0 || price < 0) {
         alert("Revisa los datos antes de guardar.");
         return;
       }
@@ -598,7 +636,7 @@
       const updatedRecord = {
         id: editingId || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
         date: dateInput.value,
-        product: productInput.value.trim(),
+        product: productName,
         quantity,
         price
       };
@@ -618,10 +656,10 @@
       editingId = null;
       dateInput.valueAsDate = new Date();
       productInput.value = "";
+      otherProductInput.value = "";
+      toggleOtherProduct();
       quantityInput.value = "";
       priceInput.value = "";
-      priceInput.readOnly = false;
-      priceInput.classList.remove("fixed-price");
       submitBtn.textContent = "Agregar registro";
       cancelEditBtn.style.display = "none";
       productInput.focus();
@@ -633,10 +671,16 @@
 
       editingId = id;
       dateInput.value = record.date;
-      productInput.value = record.product;
+      if (PRODUCT_OPTIONS.includes(record.product)) {
+        productInput.value = record.product;
+        otherProductInput.value = "";
+      } else {
+        productInput.value = "Otros";
+        otherProductInput.value = record.product;
+      }
+      toggleOtherProduct();
       quantityInput.value = record.quantity;
-      priceInput.value = isMasas(record.product) ? "7.00" : record.price;
-      applyMasasPrice();
+      priceInput.value = record.price;
       submitBtn.textContent = "Guardar cambios";
       cancelEditBtn.style.display = "block";
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -652,21 +696,77 @@
       render();
     };
 
-    productInput.addEventListener("input", applyMasasPrice);
-
-    allTab.addEventListener("click", () => {
-      activeTab = "all";
-      render();
-    });
-
-    masasTab.addEventListener("click", () => {
-      activeTab = "masas";
-      render();
-    });
-
     weekFilter.addEventListener("change", render);
     monthFilter.addEventListener("change", render);
     searchInput.addEventListener("input", render);
+
+
+    productInput.addEventListener("change", () => {
+      toggleOtherProduct();
+      if (productInput.value === "Otros") otherProductInput.focus();
+    });
+
+    function preparePrintPreview() {
+      const chosenWeek = weekFilter.value;
+      if (chosenWeek === "all") {
+        alert("Seleccione una semana específica antes de imprimir.");
+        return;
+      }
+
+      const weekRecords = records
+        .filter(r => weekStart(r.date) === chosenWeek)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      if (!weekRecords.length) {
+        alert("No hay registros en la semana seleccionada.");
+        return;
+      }
+
+      printRecordsBody.innerHTML = "";
+      weekRecords.forEach(record => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${localDate(record.date).toLocaleDateString("es-US")}</td>
+          <td>${escapeHtml(record.product)}</td>
+          <td>${record.quantity}</td>
+          <td>${money(record.price)}</td>
+          <td>${money(record.quantity * record.price)}</td>
+        `;
+        printRecordsBody.appendChild(row);
+      });
+
+      const pastriesTotal = weekRecords
+        .filter(r => !isMasas(r.product))
+        .reduce((sum, r) => sum + Number(r.quantity), 0);
+      const masasTotal = weekRecords
+        .filter(r => isMasas(r.product))
+        .reduce((sum, r) => sum + Number(r.quantity), 0);
+      const balance = weekRecords
+        .reduce((sum, r) => sum + Number(r.quantity) * Number(r.price), 0);
+
+      document.getElementById("printPeriod").textContent = `Reporte semanal: ${weekLabel(chosenWeek)}`;
+      document.getElementById("printPastriesTotal").textContent = Number(pastriesTotal.toFixed(2));
+      document.getElementById("printMasasTotal").textContent = Number(masasTotal.toFixed(2));
+      document.getElementById("printWeekBalance").textContent = money(balance);
+
+      printPreview.classList.add("active");
+      printPreview.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      printPreview.scrollTop = 0;
+    }
+
+    function closePrintPreview() {
+      printPreview.classList.remove("active");
+      printPreview.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.getElementById("printBtn").addEventListener("click", preparePrintPreview);
+    document.getElementById("backToHomeBtn").addEventListener("click", closePrintPreview);
+    document.getElementById("systemPrintBtn").addEventListener("click", () => {
+      window.print();
+    });
 
     document.getElementById("clearBtn").addEventListener("click", () => {
       if (records.length && confirm("¿Seguro que deseas borrar todos los registros?")) {
@@ -674,223 +774,6 @@
         save();
         render();
       }
-    });
-
-
-    document.getElementById("printWeekBtn").addEventListener("click", () => {
-      const chosenWeek = weekFilter.value;
-
-      if (chosenWeek === "all") {
-        alert("Selecciona una semana específica antes de imprimir.");
-        weekFilter.focus();
-        return;
-      }
-
-      const weekRecords = records
-        .filter(record => weekStart(record.date) === chosenWeek)
-        .sort((a, b) => a.date.localeCompare(b.date) || a.product.localeCompare(b.product));
-
-      if (!weekRecords.length) {
-        alert("No hay productos registrados en la semana seleccionada.");
-        return;
-      }
-
-      const start = localDate(chosenWeek);
-      const end = new Date(start);
-      end.setDate(end.getDate() + 6);
-
-      const formatFullDate = date => date.toLocaleDateString("es-US", {
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-      });
-
-      const weeklyBalance = weekRecords.reduce(
-        (sum, record) => sum + record.quantity * record.price,
-        0
-      );
-
-      const rows = weekRecords.map(record => `
-        <tr>
-          <td>${localDate(record.date).toLocaleDateString("es-US")}</td>
-          <td>${escapeHtml(record.product)}</td>
-          <td>${Number(record.quantity.toFixed(2))}</td>
-          <td>${money(record.price)}</td>
-          <td>${money(record.quantity * record.price)}</td>
-        </tr>
-      `).join("");
-
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) {
-        alert("El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes e inténtalo nuevamente.");
-        return;
-      }
-
-      printWindow.document.open();
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Recibo semanal</title>
-          <style>
-            @page {
-              size: 80mm auto;
-              margin: 5mm;
-            }
-
-            * {
-              box-sizing: border-box;
-            }
-
-            body {
-              width: 70mm;
-              margin: 0 auto;
-              padding: 0;
-              font-family: Arial, Helvetica, sans-serif;
-              color: #222;
-              background: #fff;
-              font-size: 12px;
-            }
-
-            .receipt {
-              width: 100%;
-            }
-
-            h1 {
-              margin: 0 0 6px;
-              text-align: center;
-              font-size: 17px;
-              line-height: 1.15;
-            }
-
-            .period {
-              text-align: center;
-              font-weight: 700;
-              font-size: 13px;
-              margin-bottom: 14px;
-            }
-
-            .divider {
-              border-top: 1px dashed #555;
-              margin: 8px 0;
-            }
-
-            .header-row,
-            .item-row {
-              display: grid;
-              grid-template-columns: minmax(0, 1fr) 34px 62px;
-              gap: 5px;
-              align-items: start;
-            }
-
-            .header-row {
-              font-weight: 700;
-              padding-bottom: 5px;
-            }
-
-            .item-row {
-              padding: 5px 0;
-              line-height: 1.2;
-            }
-
-            .product-name {
-              overflow-wrap: anywhere;
-            }
-
-            .qty,
-            .amount {
-              text-align: right;
-              white-space: nowrap;
-            }
-
-            .item-date {
-              grid-column: 1 / -1;
-              font-size: 10px;
-              color: #666;
-              margin-bottom: 1px;
-            }
-
-            .price-line {
-              grid-column: 1 / -1;
-              font-size: 10px;
-              color: #555;
-              text-align: right;
-              margin-top: 1px;
-            }
-
-            .total-box {
-              margin-top: 10px;
-              padding-top: 8px;
-              border-top: 2px solid #222;
-              display: flex;
-              justify-content: space-between;
-              gap: 10px;
-              font-size: 16px;
-              font-weight: 800;
-            }
-
-            .printed-at {
-              text-align: center;
-              margin-top: 14px;
-              font-size: 9px;
-              color: #777;
-            }
-
-            @media print {
-              body {
-                width: 70mm;
-                margin: 0 auto;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="receipt">
-            <h1>Palm Springs Bakery</h1>
-            <div class="period">
-              Semana del ${start.toLocaleDateString("es-US")} al ${end.toLocaleDateString("es-US")}
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="header-row">
-              <div>Producto</div>
-              <div class="qty">Cant.</div>
-              <div class="amount">Total</div>
-            </div>
-
-            <div class="divider"></div>
-
-            ${weekRecords.map(record => `
-              <div class="item-row">
-                <div class="item-date">${localDate(record.date).toLocaleDateString("es-US")}</div>
-                <div class="product-name">${escapeHtml(record.product)}</div>
-                <div class="qty">${Number(record.quantity.toFixed(2))}</div>
-                <div class="amount">${money(record.quantity * record.price)}</div>
-                <div class="price-line">Precio unitario: ${money(record.price)}</div>
-              </div>
-            `).join("")}
-
-            <div class="total-box">
-              <span>Saldo total</span>
-              <span>${money(weeklyBalance)}</span>
-            </div>
-
-            <div class="printed-at">
-              Impreso el ${new Date().toLocaleString("es-US")}
-            </div>
-          </div>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-
-      printWindow.onload = () => {
-        printWindow.focus();
-        printWindow.print();
-      };
     });
 
     document.getElementById("exportBtn").addEventListener("click", () => {

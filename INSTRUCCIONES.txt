@@ -25,21 +25,8 @@ Los registros se guardan en el navegador del dispositivo. Usa “Exportar CSV”
 Esta versión usa como icono el logo de Palm Springs Bakery proporcionado por el usuario.
 
 
-ACTUALIZACIÓN MASAS:
-- Al escribir Masas, el precio se fija automáticamente en $7.00 por unidad.
-- La pestaña Masas muestra solamente esos registros y su cantidad/saldo.
-- Los importes de Masas también se incluyen en los totales semanal, mensual y acumulado.
-
-Actualización: la pestaña Pasteles muestra solo productos que no son Masas. El resumen incluye Total de masas y Total de pasteles como cantidades.
-
-
-NOVEDAD DE ESTA VERSIÓN
-- Incluye el botón “Imprimir semana”.
-- Primero selecciona una semana específica en el filtro.
-- El reporte muestra el período, fecha, producto, cantidad, precio, total por fila y saldo total semanal.
-
-
-FORMATO DE IMPRESIÓN TIPO RECIBO
-- El reporte semanal ahora se imprime en formato estrecho, ideal para papel de 80 mm.
-- No utiliza bordes de tabla.
-- Muestra producto, cantidad, total, precio unitario y saldo total semanal.
+ACTUALIZACIÓN V2:
+- Lista desplegable de productos con opción Otros.
+- Vista previa de impresión con botón para regresar al inicio.
+- Impresión o guardado en PDF mediante el cuadro del dispositivo.
+- Totales semanales de pasteles, masas y saldo en negrita.
