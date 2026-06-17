@@ -39,3 +39,6 @@ VERSIÓN V4: En la pantalla principal, 'Unidades de la semana' fue reemplazado p
 
 
 VERSIÓN V5: Se agregó Pasteles del día, calculado según la fecha seleccionada en el formulario. En el recibo, las fechas de los registros aparecen como días de la semana y debajo de Reporte semanal se muestra la fecha de impresión.
+
+
+VERSIÓN V6: El recibo fue ajustado para impresoras térmicas de 58 mm. El área útil es de aproximadamente 52 mm y la tipografía se redujo para que los nombres de los productos se vean completos.
