@@ -36,3 +36,6 @@ VERSIÓN V3: La impresión está diseñada como recibo estrecho y termina con Pa
 
 
 VERSIÓN V4: En la pantalla principal, 'Unidades de la semana' fue reemplazado por 'Pasteles' y 'Masas'. Pasteles suma todo excepto Masas; Masas suma solo los registros llamados Masas. La impresión usa Arial 10.
+
+
+VERSIÓN V5: Se agregó Pasteles del día, calculado según la fecha seleccionada en el formulario. En el recibo, las fechas de los registros aparecen como días de la semana y debajo de Reporte semanal se muestra la fecha de impresión.

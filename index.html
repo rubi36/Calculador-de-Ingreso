@@ -110,7 +110,7 @@
 
     .summary {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 14px;
     }
 
@@ -397,6 +397,10 @@
         <strong id="weekPastries">0</strong>
       </div>
       <div class="metric">
+        <span>Pasteles del día</span>
+        <strong id="dayPastries">0</strong>
+      </div>
+      <div class="metric">
         <span>Masas</span>
         <strong id="weekMasas">0</strong>
       </div>
@@ -444,6 +448,8 @@
     </div>
     <div class="print-sheet">
       <h1 class="print-title">Palm Springs Bakery</h1>
+      <div class="print-period"><strong>Reporte semanal</strong></div>
+      <div class="print-period" id="printDate"></div>
       <div class="print-period" id="printPeriod"></div>
       <div class="table-wrap">
         <table>
@@ -501,6 +507,21 @@
     function localDate(dateString) {
       const [y, m, d] = dateString.split("-").map(Number);
       return new Date(y, m - 1, d);
+    }
+
+    function weekdayName(dateString) {
+      return localDate(dateString).toLocaleDateString("es-ES", {
+        weekday: "long"
+      });
+    }
+
+    function fullSpanishDate(date) {
+      return date.toLocaleDateString("es-ES", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
     }
 
     function weekStart(dateString) {
@@ -666,11 +687,17 @@
         .filter(r => r.product.trim().toLowerCase() === "masas")
         .reduce((sum, r) => sum + r.quantity, 0);
 
+      const selectedDay = dateInput.value;
+      const dayPastries = records
+        .filter(r => r.date === selectedDay && !isMasas(r.product))
+        .reduce((sum, r) => sum + Number(r.quantity), 0);
+
       const allTotal = records.reduce((sum, r) => sum + r.quantity * r.price, 0);
 
       document.getElementById("weekTotal").textContent = money(weekTotal);
       document.getElementById("monthTotal").textContent = money(monthTotal);
       document.getElementById("weekPastries").textContent = Number(weekPastries.toFixed(2));
+      document.getElementById("dayPastries").textContent = Number(dayPastries.toFixed(2));
       document.getElementById("weekMasas").textContent = Number(weekMasas.toFixed(2));
       document.getElementById("allTotal").textContent = money(allTotal);
     }
@@ -759,6 +786,7 @@
 
     weekFilter.addEventListener("change", render);
     monthFilter.addEventListener("change", render);
+    dateInput.addEventListener("change", render);
     searchInput.addEventListener("input", render);
 
 
@@ -787,7 +815,7 @@
       weekRecords.forEach(record => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${localDate(record.date).toLocaleDateString("es-US")}</td>
+          <td>${weekdayName(record.date)}</td>
           <td>${escapeHtml(record.product)}</td>
           <td>${record.quantity}</td>
           <td>${money(record.price)}</td>
@@ -805,7 +833,8 @@
       const balance = weekRecords
         .reduce((sum, r) => sum + Number(r.quantity) * Number(r.price), 0);
 
-      document.getElementById("printPeriod").textContent = `Reporte semanal: ${weekLabel(chosenWeek)}`;
+      document.getElementById("printDate").textContent = `Impreso: ${fullSpanishDate(new Date())}`;
+      document.getElementById("printPeriod").textContent = `Semana: ${weekLabel(chosenWeek)}`;
       document.getElementById("printPastriesTotal").textContent = Number(pastriesTotal.toFixed(2));
       document.getElementById("printMasasTotal").textContent = Number(masasTotal.toFixed(2));
       document.getElementById("printWeekBalance").textContent = money(balance);
