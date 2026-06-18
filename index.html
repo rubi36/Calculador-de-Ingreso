@@ -447,7 +447,11 @@
         <h1>Palm Springs Bakery</h1>
         <p class="subtitle">Control diario, semanal, mensual y anual de productos.</p>
       </div>
-      <button class="secondary" id="exportBtn" style="width:auto">Exportar CSV</button>
+      <div class="actions">
+        <button class="secondary" id="importBtn" style="width:auto">Importar CSV</button>
+        <button class="secondary" id="exportBtn" style="width:auto">Exportar CSV</button>
+        <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none" />
+      </div>
     </header>
 
     <nav class="nav">
@@ -534,12 +538,12 @@
 
       <section class="card">
         <div class="toolbar">
-          <h2>Registros</h2>
+          <h2>Registros del día</h2>
           <div class="filters">
-            <select id="weekFilter" aria-label="Filtrar por semana"></select>
-            <select id="monthFilter" aria-label="Filtrar por mes"></select>
-            <input type="search" id="search" placeholder="Buscar producto" />
-            <button class="danger" id="clearBtn" style="width:auto">Borrar todo</button>
+            <span class="muted">Solo se muestran los registros de la fecha seleccionada.</span>
+            <select id="weekFilter" aria-label="Filtrar por semana" style="display:none"></select>
+            <select id="monthFilter" aria-label="Filtrar por mes" style="display:none"></select>
+            <input type="search" id="search" placeholder="Buscar producto" style="display:none" />
           </div>
         </div>
 
@@ -557,7 +561,7 @@
             </thead>
             <tbody id="recordsBody"></tbody>
           </table>
-          <div class="empty" id="emptyState">Todavía no hay productos registrados.</div>
+          <div class="empty" id="emptyState">No hay productos registrados para este día.</div>
         </div>
       </section>
     </section>
@@ -649,6 +653,8 @@
     const emptyState = document.getElementById("emptyState");
     const submitBtn = document.getElementById("submitBtn");
     const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const importBtn = document.getElementById("importBtn");
+    const csvFileInput = document.getElementById("csvFileInput");
 
     dateInput.valueAsDate = new Date();
 
@@ -825,9 +831,9 @@
       const chosenMonth = monthFilter.value;
       const term = searchInput.value.trim().toLowerCase();
 
+      const selectedDayForTable = dateInput.value;
       const visible = records
-        .filter(r => chosenWeek === "all" || !chosenWeek || weekStart(r.date) === chosenWeek)
-        .filter(r => chosenMonth === "all" || !chosenMonth || monthKey(r.date) === chosenMonth)
+        .filter(r => r.date === selectedDayForTable)
         .filter(r => r.product.toLowerCase().includes(term))
         .sort((a, b) => b.date.localeCompare(a.date));
 
@@ -969,12 +975,120 @@
     dateInput.addEventListener("change", render);
     searchInput.addEventListener("input", render);
 
-    document.getElementById("clearBtn").addEventListener("click", () => {
-      if (records.length && confirm("¿Seguro que deseas borrar todos los registros?")) {
-        records = [];
-        save();
-        resetForm();
+
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let value = "";
+      let insideQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"' && insideQuotes && next === '"') {
+          value += '"';
+          i++;
+        } else if (char === '"') {
+          insideQuotes = !insideQuotes;
+        } else if (char === "," && !insideQuotes) {
+          row.push(value);
+          value = "";
+        } else if ((char === "\n" || char === "\r") && !insideQuotes) {
+          if (char === "\r" && next === "\n") i++;
+          row.push(value);
+          if (row.some(cell => cell.trim() !== "")) rows.push(row);
+          row = [];
+          value = "";
+        } else {
+          value += char;
+        }
       }
+
+      row.push(value);
+      if (row.some(cell => cell.trim() !== "")) rows.push(row);
+      return rows;
+    }
+
+    function normalizeHeader(text) {
+      return String(text || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function importCSVText(text) {
+      const rows = parseCSV(text);
+      if (rows.length < 2) {
+        alert("El archivo CSV no tiene registros para importar.");
+        return;
+      }
+
+      const headers = rows[0].map(normalizeHeader);
+      const idxFecha = headers.findIndex(h => h === "fecha" || h === "date");
+      const idxProducto = headers.findIndex(h => h === "producto" || h === "product");
+      const idxCantidad = headers.findIndex(h => h === "cantidad" || h === "cant" || h === "qty");
+      const idxPrecio = headers.findIndex(h => h.includes("precio"));
+      const idxImporte = headers.findIndex(h => h === "importe" || h === "total");
+
+      if (idxFecha === -1 || idxProducto === -1 || idxCantidad === -1) {
+        alert("El CSV debe tener columnas de Fecha, Producto y Cantidad.");
+        return;
+      }
+
+      const imported = [];
+
+      rows.slice(1).forEach(row => {
+        const date = String(row[idxFecha] || "").trim();
+        const product = String(row[idxProducto] || "").trim();
+        const quantity = Number(String(row[idxCantidad] || "").replace("$", "").replace(",", "."));
+        let price = idxPrecio >= 0 ? Number(String(row[idxPrecio] || "").replace("$", "").replace(",", ".")) : NaN;
+        const importe = idxImporte >= 0 ? Number(String(row[idxImporte] || "").replace("$", "").replace(",", ".")) : NaN;
+
+        if ((!Number.isFinite(price) || price < 0) && Number.isFinite(importe) && quantity > 0) {
+          price = importe / quantity;
+        }
+
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date) && product && quantity > 0 && Number.isFinite(price) && price >= 0) {
+          imported.push({
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+            date,
+            product,
+            quantity,
+            price
+          });
+        }
+      });
+
+      if (!imported.length) {
+        alert("No se pudo importar ningún registro. Revisa el formato del CSV.");
+        return;
+      }
+
+      const ok = confirm(`Se importarán ${imported.length} registros. ¿Deseas continuar?`);
+      if (!ok) return;
+
+      records = records.concat(imported);
+      save();
+      render();
+      alert(`Listo. Se importaron ${imported.length} registros.`);
+    }
+
+    importBtn.addEventListener("click", () => {
+      csvFileInput.value = "";
+      csvFileInput.click();
+    });
+
+    csvFileInput.addEventListener("change", event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => importCSVText(String(reader.result || ""));
+      reader.onerror = () => alert("No se pudo leer el archivo CSV.");
+      reader.readAsText(file, "UTF-8");
     });
 
     document.getElementById("exportBtn").addEventListener("click", () => {

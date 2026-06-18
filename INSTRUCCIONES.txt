@@ -50,3 +50,10 @@ VERSIÓN V7:
 - Mes imprime reporte A4 con resumen, detalle de productos y totales.
 - Año imprime reporte A4 con resumen anual por meses.
 Para actualizar en GitHub Pages, sube todos estos archivos y confirma con Commit changes.
+
+VERSIÓN V8:
+- En Inicio, la tabla muestra solo los registros del día seleccionado.
+- Los registros siguen guardándose para Semana, Mes y Año.
+- Se eliminó el botón Borrar todo para evitar accidentes.
+- Se agregó Importar CSV para abrir un archivo CSV y añadir registros.
+- El CSV debe tener columnas: Fecha, Producto, Cantidad y Precio por unidad. También puede usar Importe para calcular precio si hace falta.
