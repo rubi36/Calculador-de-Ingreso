@@ -57,3 +57,10 @@ VERSIÓN V8:
 - Se eliminó el botón Borrar todo para evitar accidentes.
 - Se agregó Importar CSV para abrir un archivo CSV y añadir registros.
 - El CSV debe tener columnas: Fecha, Producto, Cantidad y Precio por unidad. También puede usar Importe para calcular precio si hace falta.
+
+VERSIÓN V9:
+- Los reportes se pueden revisar en pantalla antes de imprimir.
+- Semana muestra una lista en pantalla sin botones de editar/borrar.
+- La impresión semanal sigue saliendo en recibo de 58 mm.
+- Mes y Año imprimen en A4 con Arial 10.
+- Títulos, encabezados y totales importantes están en negrita.

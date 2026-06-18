@@ -309,6 +309,63 @@
       padding-top: 6px;
     }
 
+
+    .screen-report {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      width: min(1000px, 100%);
+      margin: 0 auto;
+      color: #111;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
+    }
+
+    .screen-report h1 {
+      text-align: center;
+      font-size: 18pt;
+      margin: 0 0 8px;
+      font-weight: 800;
+    }
+
+    .screen-report .report-meta {
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .screen-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .screen-summary div {
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 800;
+    }
+
+    .screen-table {
+      min-width: 0;
+      font-size: 10pt;
+    }
+
+    .screen-table th {
+      font-weight: 800;
+      color: #111;
+    }
+
+    .screen-table th, .screen-table td {
+      padding: 7px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .print-only { display: none; }
+
     .a4-sheet {
       background: white;
       border-radius: 16px;
@@ -318,7 +375,7 @@
       margin: 0 auto;
       color: #111;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 11pt;
+      font-size: 10pt;
     }
 
     .a4-header {
@@ -329,7 +386,7 @@
     }
 
     .a4-header h1 {
-      font-size: 22pt;
+      font-size: 18pt;
       margin: 0 0 6px;
     }
 
@@ -348,7 +405,7 @@
 
     .a4-metric strong {
       display: block;
-      font-size: 15pt;
+      font-size: 12pt;
       margin-top: 5px;
     }
 
@@ -389,6 +446,34 @@
       body.print-week @page {
         size: 58mm auto;
         margin: 2mm;
+      }
+
+
+      body.print-week .screen-report {
+        display: none !important;
+      }
+
+      body.print-week .print-only {
+        display: block !important;
+      }
+
+      body.print-month .a4-sheet,
+      body.print-year .a4-sheet {
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 10pt !important;
+      }
+
+      body.print-month .a4-sheet h1,
+      body.print-year .a4-sheet h1,
+      body.print-month .a4-sheet h2,
+      body.print-year .a4-sheet h2,
+      body.print-month .a4-total-box,
+      body.print-year .a4-total-box,
+      body.print-month .a4-table th,
+      body.print-year .a4-table th,
+      body.print-month .a4-summary,
+      body.print-year .a4-summary {
+        font-weight: 800 !important;
       }
 
       body.print-week .receipt-sheet {
@@ -605,7 +690,8 @@
       <button class="secondary backBtn">Regresar al inicio</button>
       <button class="primary" id="printWeekBtn">Imprimir o guardar PDF</button>
     </div>
-    <div class="receipt-sheet" id="weekReceipt"></div>
+    <div class="screen-report" id="weekScreenReport"></div>
+    <div class="receipt-sheet print-only" id="weekReceipt"></div>
   </section>
 
   <section class="report-screen" id="monthReportScreen">
@@ -1154,7 +1240,54 @@
       const grouped = groupByDay(list);
       const totals = calcTotals(list);
 
-      let html = `
+      const screenRows = list.map(r => `
+        <tr>
+          <td>${weekdayName(r.date)}</td>
+          <td>${formatShortDate(r.date)}</td>
+          <td>${escapeHtml(r.product)}</td>
+          <td>${numberDisplay(r.quantity)}</td>
+          <td>${money(r.price)}</td>
+          <td>${money(Number(r.quantity) * Number(r.price))}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("weekScreenReport").innerHTML = `
+        <h1>Reporte semanal</h1>
+        <div class="report-meta">Semana: ${weekLabel(week)}</div>
+
+        <div class="screen-summary">
+          <div>Pasteles: ${numberDisplay(totals.pastriesQty)} &nbsp; ${money(totals.pastriesMoney)}</div>
+          <div>Masas: ${numberDisplay(totals.masasQty)} &nbsp; ${money(totals.masasMoney)}</div>
+          <div>Total $: ${money(totals.totalMoney)}</div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="screen-table">
+            <thead>
+              <tr>
+                <th>Día</th>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Cant.</th>
+                <th>Precio</th>
+                <th>Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${screenRows || `<tr><td colspan="6">No hay registros para esta semana.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="a4-total-box">
+          <div><strong>TOTAL SEMANA</strong></div>
+          <div class="a4-total-row"><span><strong>Pasteles: ${numberDisplay(totals.pastriesQty)}</strong></span><span><strong>${money(totals.pastriesMoney)}</strong></span></div>
+          <div class="a4-total-row"><span><strong>Masas: ${numberDisplay(totals.masasQty)}</strong></span><span><strong>${money(totals.masasMoney)}</strong></span></div>
+          <div class="a4-total-row"><span><strong>Total $:</strong></span><span><strong>${money(totals.totalMoney)}</strong></span></div>
+        </div>
+      `;
+
+      let receiptHtml = `
         <h1 class="receipt-title">PALM SPRINGS BAKERY</h1>
         <div class="receipt-subtitle"><strong>REPORTE SEMANAL</strong></div>
         <div class="receipt-subtitle">Impreso: ${formatFullDate(new Date())}</div>
@@ -1163,20 +1296,20 @@
       `;
 
       if (!list.length) {
-        html += `<div class="receipt-subtitle">No hay registros para esta semana.</div>`;
+        receiptHtml += `<div class="receipt-subtitle">No hay registros para esta semana.</div>`;
       }
 
       Object.keys(grouped).forEach(date => {
         const dayRecords = grouped[date];
         const dayTotals = calcTotals(dayRecords);
 
-        html += `
+        receiptHtml += `
           <div class="day-block">
             <div class="day-title">${weekdayName(date)}</div>
         `;
 
         dayRecords.forEach(r => {
-          html += `
+          receiptHtml += `
             <div class="receipt-row">
               <div class="receipt-product">${escapeHtml(r.product)}</div>
               <div class="receipt-qty">${numberDisplay(r.quantity)}</div>
@@ -1185,7 +1318,7 @@
           `;
         });
 
-        html += `
+        receiptHtml += `
             <div class="day-totals">
               <div class="day-total-row"><span>Pasteles:</span><span>${numberDisplay(dayTotals.pastriesQty)}</span></div>
               <div class="day-total-row"><span>Masas:</span><span>${numberDisplay(dayTotals.masasQty)}</span></div>
@@ -1195,7 +1328,7 @@
         `;
       });
 
-      html += `
+      receiptHtml += `
         <div class="week-totals">
           <div><strong>TOTAL SEMANA</strong></div>
           <div class="week-total-row"><span>Pasteles: ${numberDisplay(totals.pastriesQty)}</span><span>${money(totals.pastriesMoney)}</span></div>
@@ -1204,7 +1337,7 @@
         </div>
       `;
 
-      document.getElementById("weekReceipt").innerHTML = html;
+      document.getElementById("weekReceipt").innerHTML = receiptHtml;
     }
 
     function buildMonthReport(month) {
@@ -1228,14 +1361,14 @@
           <div class="muted">Impreso: ${formatFullDate(new Date())}</div>
         </div>
 
-        <h2>Resumen del mes</h2>
+        <h2><strong>Resumen del mes</strong></h2>
         <div class="a4-summary">
           <div class="a4-metric"><span>Pasteles</span><strong>${numberDisplay(totals.pastriesQty)} &nbsp; ${money(totals.pastriesMoney)}</strong></div>
           <div class="a4-metric"><span>Masas</span><strong>${numberDisplay(totals.masasQty)} &nbsp; ${money(totals.masasMoney)}</strong></div>
           <div class="a4-metric"><span>Total $</span><strong>${money(totals.totalMoney)}</strong></div>
         </div>
 
-        <h2>Detalle de productos</h2>
+        <h2><strong>Detalle de productos</strong></h2>
         <div class="table-wrap">
           <table class="a4-table">
             <thead>
@@ -1254,10 +1387,10 @@
         </div>
 
         <div class="a4-total-box">
-          <div>TOTALES DEL MES</div>
-          <div class="a4-total-row"><span>Pasteles: ${numberDisplay(totals.pastriesQty)}</span><span>${money(totals.pastriesMoney)}</span></div>
-          <div class="a4-total-row"><span>Masas: ${numberDisplay(totals.masasQty)}</span><span>${money(totals.masasMoney)}</span></div>
-          <div class="a4-total-row"><span>Total $:</span><span>${money(totals.totalMoney)}</span></div>
+          <div><strong>TOTALES DEL MES</strong></div>
+          <div class="a4-total-row"><span><strong>Pasteles: ${numberDisplay(totals.pastriesQty)}</strong></span><span><strong>${money(totals.pastriesMoney)}</strong></span></div>
+          <div class="a4-total-row"><span><strong>Masas: ${numberDisplay(totals.masasQty)}</strong></span><span><strong>${money(totals.masasMoney)}</strong></span></div>
+          <div class="a4-total-row"><span><strong>Total $:</strong></span><span><strong>${money(totals.totalMoney)}</strong></span></div>
         </div>
       `;
     }
@@ -1289,14 +1422,14 @@
           <div class="muted">Impreso: ${formatFullDate(new Date())}</div>
         </div>
 
-        <h2>Resumen anual</h2>
+        <h2><strong>Resumen anual</strong></h2>
         <div class="a4-summary">
           <div class="a4-metric"><span>Pasteles</span><strong>${numberDisplay(totals.pastriesQty)} &nbsp; ${money(totals.pastriesMoney)}</strong></div>
           <div class="a4-metric"><span>Masas</span><strong>${numberDisplay(totals.masasQty)} &nbsp; ${money(totals.masasMoney)}</strong></div>
           <div class="a4-metric"><span>Total $</span><strong>${money(totals.totalMoney)}</strong></div>
         </div>
 
-        <h2>Resumen por mes</h2>
+        <h2><strong>Resumen por mes</strong></h2>
         <div class="table-wrap">
           <table class="a4-table">
             <thead>
@@ -1314,10 +1447,10 @@
         </div>
 
         <div class="a4-total-box">
-          <div>TOTAL DEL AÑO</div>
-          <div class="a4-total-row"><span>Pasteles: ${numberDisplay(totals.pastriesQty)}</span><span>${money(totals.pastriesMoney)}</span></div>
-          <div class="a4-total-row"><span>Masas: ${numberDisplay(totals.masasQty)}</span><span>${money(totals.masasMoney)}</span></div>
-          <div class="a4-total-row"><span>Total $:</span><span>${money(totals.totalMoney)}</span></div>
+          <div><strong>TOTAL DEL AÑO</strong></div>
+          <div class="a4-total-row"><span><strong>Pasteles: ${numberDisplay(totals.pastriesQty)}</strong></span><span><strong>${money(totals.pastriesMoney)}</strong></span></div>
+          <div class="a4-total-row"><span><strong>Masas: ${numberDisplay(totals.masasQty)}</strong></span><span><strong>${money(totals.masasMoney)}</strong></span></div>
+          <div class="a4-total-row"><span><strong>Total $:</strong></span><span><strong>${money(totals.totalMoney)}</strong></span></div>
         </div>
       `;
     }
