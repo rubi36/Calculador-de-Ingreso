@@ -25,42 +25,27 @@ Los registros se guardan en el navegador del dispositivo. Usa “Exportar CSV”
 Esta versión usa como icono el logo de Palm Springs Bakery proporcionado por el usuario.
 
 
-ACTUALIZACIÓN V2:
-- Lista desplegable de productos con opción Otros.
-- Vista previa de impresión con botón para regresar al inicio.
-- Impresión o guardado en PDF mediante el cuadro del dispositivo.
-- Totales semanales de pasteles, masas y saldo en negrita.
+ACTUALIZACIÓN MASAS:
+- Al escribir Masas, el precio se fija automáticamente en $7.00 por unidad.
+- La pestaña Masas muestra solamente esos registros y su cantidad/saldo.
+- Los importes de Masas también se incluyen en los totales semanal, mensual y acumulado.
+
+Actualización: la pestaña Pasteles muestra solo productos que no son Masas. El resumen incluye Total de masas y Total de pasteles como cantidades.
 
 
-VERSIÓN V3: La impresión está diseñada como recibo estrecho y termina con Pasteles, Masas y Total $ en negrita.
+NOVEDAD DE ESTA VERSIÓN
+- Incluye el botón “Imprimir semana”.
+- Primero selecciona una semana específica en el filtro.
+- El reporte muestra el período, fecha, producto, cantidad, precio, total por fila y saldo total semanal.
 
 
-VERSIÓN V4: En la pantalla principal, 'Unidades de la semana' fue reemplazado por 'Pasteles' y 'Masas'. Pasteles suma todo excepto Masas; Masas suma solo los registros llamados Masas. La impresión usa Arial 10.
+FORMATO DE IMPRESIÓN TIPO RECIBO
+- El reporte semanal ahora se imprime en formato estrecho, ideal para papel de 80 mm.
+- No utiliza bordes de tabla.
+- Muestra producto, cantidad, total, precio unitario y saldo total semanal.
 
 
-VERSIÓN V5: Se agregó Pasteles del día, calculado según la fecha seleccionada en el formulario. En el recibo, las fechas de los registros aparecen como días de la semana y debajo de Reporte semanal se muestra la fecha de impresión.
-
-
-VERSIÓN V6: El recibo fue ajustado para impresoras térmicas de 58 mm. El área útil es de aproximadamente 52 mm y la tipografía se redujo para que los nombres de los productos se vean completos.
-
-VERSIÓN V7:
-- Se reorganizó la interfaz en secciones: Inicio, Semana, Mes y Año.
-- Inicio mantiene la entrada diaria, edición y resumen diario/semanal.
-- Semana imprime recibo de 58 mm agrupado por días.
-- Mes imprime reporte A4 con resumen, detalle de productos y totales.
-- Año imprime reporte A4 con resumen anual por meses.
-Para actualizar en GitHub Pages, sube todos estos archivos y confirma con Commit changes.
-
-VERSIÓN V8:
-- En Inicio, la tabla muestra solo los registros del día seleccionado.
-- Los registros siguen guardándose para Semana, Mes y Año.
-- Se eliminó el botón Borrar todo para evitar accidentes.
-- Se agregó Importar CSV para abrir un archivo CSV y añadir registros.
-- El CSV debe tener columnas: Fecha, Producto, Cantidad y Precio por unidad. También puede usar Importe para calcular precio si hace falta.
-
-VERSIÓN V9:
-- Los reportes se pueden revisar en pantalla antes de imprimir.
-- Semana muestra una lista en pantalla sin botones de editar/borrar.
-- La impresión semanal sigue saliendo en recibo de 58 mm.
-- Mes y Año imprimen en A4 con Arial 10.
-- Títulos, encabezados y totales importantes están en negrita.
+ACTUALIZACIÓN NUEVA
+- El recibo semanal fue reajustado para papel térmico de 57 mm.
+- Ahora el recibo imprime el logo de Palm Springs Bakery en la parte superior.
+- Si en el iPhone sigue saliendo la versión anterior, vuelve a subir estos archivos a GitHub, espera unos minutos, abre la app en Safari y recárgala antes de abrir el icono instalado.

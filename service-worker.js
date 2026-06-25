@@ -1,11 +1,10 @@
-const CACHE_NAME = "palm-springs-bakery-v9-reportes";
+const CACHE_NAME = "control-productos-v7";
 const APP_FILES = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/apple-touch-icon.png"
+  "./icons/icon-512.png"
 ];
 
 self.addEventListener("install", event => {
