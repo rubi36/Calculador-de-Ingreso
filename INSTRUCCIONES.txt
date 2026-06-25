@@ -64,3 +64,10 @@ VERSIÓN V9:
 - La impresión semanal sigue saliendo en recibo de 58 mm.
 - Mes y Año imprimen en A4 con Arial 10.
 - Títulos, encabezados y totales importantes están en negrita.
+
+
+VERSIÓN V10:
+- Se mantiene la app igual que la versión anterior.
+- Solo se reajustó la impresión semanal para papel térmico de 57 mm.
+- El área útil del recibo se redujo a aproximadamente 49 mm para que el contenido quepa mejor.
+- Se redujeron columnas y tamaños de letra del recibo semanal.

@@ -237,27 +237,27 @@
     .report-controls button { width: auto; }
 
     .receipt-sheet {
-      width: min(58mm, 100%);
+      width: min(57mm, 100%);
       margin: 0 auto;
       background: white;
       border-radius: 12px;
       box-shadow: var(--shadow);
       padding: 10px 6px;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 7pt;
+      font-size: 6.4pt;
       color: #000;
     }
 
     .receipt-title {
       text-align: center;
       margin: 0 0 3px;
-      font-size: 8.5pt;
+      font-size: 7.6pt;
       font-weight: 800;
     }
 
     .receipt-subtitle {
       text-align: center;
-      font-size: 6.8pt;
+      font-size: 6.1pt;
       margin: 2px 0;
     }
 
@@ -271,12 +271,12 @@
       font-weight: 800;
       text-transform: uppercase;
       margin-bottom: 4px;
-      font-size: 7.5pt;
+      font-size: 6.8pt;
     }
 
     .receipt-row {
       display: grid;
-      grid-template-columns: 1fr 7mm 15mm;
+      grid-template-columns: 1fr 6mm 13mm;
       gap: 2px;
       align-items: start;
       margin: 2px 0;
@@ -444,7 +444,7 @@
       .report-screen.active { display: block !important; margin: 0 !important; width: 100% !important; }
 
       body.print-week @page {
-        size: 58mm auto;
+        size: 57mm auto;
         margin: 2mm;
       }
 
@@ -477,18 +477,18 @@
       }
 
       body.print-week .receipt-sheet {
-        width: 52mm !important;
-        max-width: 52mm !important;
+        width: 49mm !important;
+        max-width: 49mm !important;
         margin: 0 auto !important;
         padding: 0 !important;
         box-shadow: none !important;
         border-radius: 0 !important;
-        font-size: 6.5pt !important;
+        font-size: 5.9pt !important;
       }
 
-      body.print-week .receipt-title { font-size: 8pt !important; }
-      body.print-week .receipt-subtitle { font-size: 6.4pt !important; }
-      body.print-week .day-title { font-size: 7pt !important; }
+      body.print-week .receipt-title { font-size: 7.1pt !important; }
+      body.print-week .receipt-subtitle { font-size: 5.8pt !important; }
+      body.print-week .day-title { font-size: 6.3pt !important; }
 
       body.print-month @page,
       body.print-year @page {
