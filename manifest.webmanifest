@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Control de Productos y Ventas",
-  "short_name": "Mis Productos",
-  "description": "Registro de productos, cantidades, precios y saldos semanales y mensuales.",
+  "name": "Palm Springs Bakery",
+  "short_name": "Bakery",
+  "description": "Registro diario, reportes semanales, mensuales y anuales de Palm Springs Bakery.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
