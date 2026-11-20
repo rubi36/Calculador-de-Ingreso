@@ -1,3 +1,11 @@
+PALM SPRINGS BAKERY — ACTUALIZACIÓN V10
+
+1. Antes de actualizar, abre la aplicación actual y pulsa Exportar CSV para conservar una copia de tus registros. No borres datos del navegador.
+2. Descomprime el ZIP y sube los archivos y la carpeta icons al mismo repositorio GitHub Pages, reemplazando los anteriores. Incluye report-pdf.js, que es nuevo. Mantén la misma URL.
+3. Cuando GitHub Pages publique los cambios, abre la URL en Safari y recarga; cierra y vuelve a abrir la app instalada. Si el icono no cambia, comprueba primero que tienes el CSV de respaldo y que los registros aparecen en Safari antes de volver a agregar el acceso directo a pantalla de inicio. No importes el CSV si los registros ya están presentes, para evitar duplicados.
+4. Semana, Mes o Año > selecciona el período > Ver reporte > Imprimir o Guardar / compartir PDF. En iPhone, ambos botones abren el menú Compartir si el dispositivo permite compartir archivos PDF. Allí elige Imprimir (AirPrint) o Guardar en Archivos. Si no aparece el menú, se ofrece descargar el PDF; ábrelo en Archivos y usa Compartir.
+5. Semana conserva el formato de recibo de 58 mm; Mes y Año usan A4. La impresora debe admitir el formato y AirPrint o su propia aplicación compatible. El PDF se genera localmente, sin conexión una vez cargada la actualización.
+6. Se mantiene la clave de almacenamiento original. Los datos dependen del navegador y del contexto de instalación; conserva tu copia CSV.
 APP CONTROL DE PRODUCTOS — PASOS PARA PUBLICAR
 
 1. Entra en GitHub y crea un repositorio nuevo, por ejemplo: control-productos.
@@ -64,10 +72,3 @@ VERSIÓN V9:
 - La impresión semanal sigue saliendo en recibo de 58 mm.
 - Mes y Año imprimen en A4 con Arial 10.
 - Títulos, encabezados y totales importantes están en negrita.
-
-
-VERSIÓN V10:
-- Se mantiene la app igual que la versión anterior.
-- Solo se reajustó la impresión semanal para papel térmico de 57 mm.
-- El área útil del recibo se redujo a aproximadamente 49 mm para que el contenido quepa mejor.
-- Se redujeron columnas y tamaños de letra del recibo semanal.

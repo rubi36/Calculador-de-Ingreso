@@ -8,9 +8,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Palm Springs Bakery" />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-  <style>
+  <link rel="manifest" href="manifest.webmanifest?v=10" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=10" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png?v=10" />
+  <style id="appStyles">
     :root {
       --bg: #f6f3ef;
       --card: #ffffff;
@@ -237,27 +238,27 @@
     .report-controls button { width: auto; }
 
     .receipt-sheet {
-      width: min(57mm, 100%);
+      width: min(58mm, 100%);
       margin: 0 auto;
       background: white;
       border-radius: 12px;
       box-shadow: var(--shadow);
       padding: 10px 6px;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 6.4pt;
+      font-size: 7pt;
       color: #000;
     }
 
     .receipt-title {
       text-align: center;
       margin: 0 0 3px;
-      font-size: 7.6pt;
+      font-size: 8.5pt;
       font-weight: 800;
     }
 
     .receipt-subtitle {
       text-align: center;
-      font-size: 6.1pt;
+      font-size: 6.8pt;
       margin: 2px 0;
     }
 
@@ -271,12 +272,12 @@
       font-weight: 800;
       text-transform: uppercase;
       margin-bottom: 4px;
-      font-size: 6.8pt;
+      font-size: 7.5pt;
     }
 
     .receipt-row {
       display: grid;
-      grid-template-columns: 1fr 6mm 13mm;
+      grid-template-columns: 1fr 7mm 15mm;
       gap: 2px;
       align-items: start;
       margin: 2px 0;
@@ -443,10 +444,7 @@
       .app-shell, .report-controls { display: none !important; }
       .report-screen.active { display: block !important; margin: 0 !important; width: 100% !important; }
 
-      body.print-week @page {
-        size: 57mm auto;
-        margin: 2mm;
-      }
+
 
 
       body.print-week .screen-report {
@@ -477,24 +475,20 @@
       }
 
       body.print-week .receipt-sheet {
-        width: 49mm !important;
-        max-width: 49mm !important;
+        width: 52mm !important;
+        max-width: 52mm !important;
         margin: 0 auto !important;
         padding: 0 !important;
         box-shadow: none !important;
         border-radius: 0 !important;
-        font-size: 5.9pt !important;
+        font-size: 6.5pt !important;
       }
 
-      body.print-week .receipt-title { font-size: 7.1pt !important; }
-      body.print-week .receipt-subtitle { font-size: 5.8pt !important; }
-      body.print-week .day-title { font-size: 6.3pt !important; }
+      body.print-week .receipt-title { font-size: 8pt !important; }
+      body.print-week .receipt-subtitle { font-size: 6.4pt !important; }
+      body.print-week .day-title { font-size: 7pt !important; }
 
-      body.print-month @page,
-      body.print-year @page {
-        size: A4;
-        margin: 12mm;
-      }
+
 
       body.print-month .a4-sheet,
       body.print-year .a4-sheet {
@@ -523,7 +517,16 @@
       .toolbar .filters, .actions { width: 100%; }
       .toolbar select, .toolbar input, .actions button { width: 100%; }
     }
+    @media print {
+      html, body { min-height: 0 !important; }
+      .report-screen .table-wrap { overflow: visible !important; }
+      .a4-summary { grid-template-columns: repeat(3, 1fr) !important; }
+      tr, .a4-metric, .a4-total-row, .receipt-row { break-inside: avoid; page-break-inside: avoid; }
+      thead { display: table-header-group; }
+      .report-screen table { width: 100%; min-width: 0; }
+    }
   </style>
+  <style id="printPageStyle"></style>
 </head>
 <body>
   <main class="container app-shell" id="appShell">
@@ -688,7 +691,8 @@
   <section class="report-screen" id="weekReportScreen">
     <div class="report-controls">
       <button class="secondary backBtn">Regresar al inicio</button>
-      <button class="primary" id="printWeekBtn">Imprimir o guardar PDF</button>
+      <button class="primary" id="printWeekBtn">Imprimir</button>
+      <button class="success" id="pdfWeekBtn">Guardar / compartir PDF</button>
     </div>
     <div class="screen-report" id="weekScreenReport"></div>
     <div class="receipt-sheet print-only" id="weekReceipt"></div>
@@ -697,7 +701,8 @@
   <section class="report-screen" id="monthReportScreen">
     <div class="report-controls">
       <button class="secondary backBtn">Regresar al inicio</button>
-      <button class="primary" id="printMonthBtn">Imprimir o guardar PDF</button>
+      <button class="primary" id="printMonthBtn">Imprimir</button>
+      <button class="success" id="pdfMonthBtn">Guardar / compartir PDF</button>
     </div>
     <div class="a4-sheet" id="monthReport"></div>
   </section>
@@ -705,11 +710,13 @@
   <section class="report-screen" id="yearReportScreen">
     <div class="report-controls">
       <button class="secondary backBtn">Regresar al inicio</button>
-      <button class="primary" id="printYearBtn">Imprimir o guardar PDF</button>
+      <button class="primary" id="printYearBtn">Imprimir</button>
+      <button class="success" id="pdfYearBtn">Guardar / compartir PDF</button>
     </div>
     <div class="a4-sheet" id="yearReport"></div>
   </section>
 
+  <script src="report-pdf.js"></script>
   <script>
     const STORAGE_KEY = "control_productos_registros_v1";
     let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
@@ -1213,6 +1220,7 @@
       document.getElementById(screenId).classList.add("active");
       document.body.classList.remove("print-week", "print-month", "print-year");
       document.body.classList.add(printClass);
+      document.getElementById("printPageStyle").textContent = printClass === "print-week" ? "@page { size: 58mm 200mm; margin: 2mm; }" : "@page { size: A4; margin: 12mm; }";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1482,9 +1490,10 @@
       showReport("yearReportScreen", "print-year");
     });
 
-    document.getElementById("printWeekBtn").addEventListener("click", () => window.print());
-    document.getElementById("printMonthBtn").addEventListener("click", () => window.print());
-    document.getElementById("printYearBtn").addEventListener("click", () => window.print());
+    for (const kind of ["Week", "Month", "Year"]) {
+      document.getElementById("print" + kind + "Btn").addEventListener("click", () => printReport(kind));
+      document.getElementById("pdf" + kind + "Btn").addEventListener("click", () => shareReport(kind));
+    }
 
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
